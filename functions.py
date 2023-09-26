@@ -1,0 +1,63 @@
+# import libraries
+import numpy as np
+
+# Adds normally distributed noise to the objective function.
+def add_noise(MU, SIGMA):
+    return np.random.normal(MU, SIGMA, size=1)
+
+
+def estimate_gradient(objective_f, theta, i, STOCHASTIC, MU, SIGMA, BATCH, NR_ESTIMATES):
+    delta_i = np.random.choice((-1, 1), size=theta.shape)
+    eta_i = 1 / (i + 1)
+
+    if BATCH:
+        gradient_estimates = np.zeros(NR_ESTIMATES)
+        for n in range(NR_ESTIMATES):
+            perturbation_high = objective_f(theta + eta_i * delta_i, STOCHASTIC, MU, SIGMA)
+            perturbation_low = objective_f(theta - eta_i * delta_i, STOCHASTIC, MU, SIGMA)
+            numerator = perturbation_high - perturbation_low
+            denominator = 2 * eta_i * delta_i
+            gradient_estimates[n] = numerator / denominator
+        gradient_estimate = np.mean(gradient_estimates)
+    else:
+        perturbation_high = objective_f(theta + eta_i * delta_i, STOCHASTIC, MU, SIGMA)
+        perturbation_low = objective_f(theta - eta_i * delta_i, STOCHASTIC, MU, SIGMA)
+        numerator = perturbation_high - perturbation_low
+        denominator = 2 * eta_i * delta_i
+        gradient_estimate = numerator / denominator
+
+    return gradient_estimate
+
+
+# The SPSA algorithm
+def SPSA(objective_f, THETA_0, EPSILON_TYPE, EPSILON_VALUE, NR_ITERATIONS, STOCHASTIC, MU, SIGMA, BATCH, NR_ESTIMATES, OPTIMIZATION_TYPE):
+    thetas = np.zeros((NR_ITERATIONS + 1, len(THETA_0)))
+    gradients = np.zeros((NR_ITERATIONS, len(THETA_0)))
+    objective_values = np.zeros(NR_ITERATIONS)
+    thetas[0,:] = THETA_0
+
+    for i in range(NR_ITERATIONS):
+        g = estimate_gradient(objective_f, thetas[i,:], i, STOCHASTIC, MU, SIGMA, BATCH, NR_ESTIMATES)
+        gradients[i] = g
+        if EPSILON_TYPE == 'fixed':
+            if OPTIMIZATION_TYPE == 'minimization':
+                thetas[i + 1,:] = thetas[i,:] - EPSILON_VALUE * g
+            if OPTIMIZATION_TYPE == 'maximization':
+                thetas[i + 1,:] = thetas[i,:] + EPSILON_VALUE * g
+        if EPSILON_TYPE == 'decreasing':
+            if OPTIMIZATION_TYPE == 'minimization':
+                thetas[i + 1,:] = thetas[i,:] - 1 / (i + 1) * g
+            if OPTIMIZATION_TYPE == 'maximization':
+                thetas[i + 1,:] = thetas[i,:] + 1 / (i + 1) * g
+        objective_values[i] = objective_f(thetas[i + 1], STOCHASTIC, MU, SIGMA)
+
+    return thetas, gradients, objective_values
+
+def Objective_J(theta, STOCHASTIC, MU, SIGMA):
+    first_part = theta[0] ** 4 - 16 * theta[0] ** 2 + 5 * theta[0]
+    second_part = theta[1] ** 4 - 16 * theta[1] ** 2 + 5 * theta[1]
+
+    if STOCHASTIC:
+        return 0.5 * (first_part + second_part) + add_noise(MU, SIGMA)
+
+    return 0.5 * (first_part + second_part)

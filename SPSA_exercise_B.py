@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from functions import SPSA, Objective_J
+from SGDFOaL.functions import SPSA, Objective_J
 # Set SPSA hyperparameters
 THETA_0 = np.array([0, 0])  # Initial guess for θ₁ and θ₂
 EPSILON_TYPE = 'fixed'  # Use 'fixed' or 'decreasing' for ε
@@ -28,7 +28,7 @@ plt.xlim(-8, 8)
 plt.ylim(-8, 8)
 plt.xlabel('$\\theta_1$')
 plt.ylabel('$\\theta_2$')
-plt.title('Optimization Trajectory of $\\theta$')
+plt.title('Optimization Trajectory of $\\theta$ using SPSA')
 plt.grid(True)
 
 # Create a separate plot for the convergence of the objective value
@@ -36,7 +36,7 @@ plt.figure(figsize=(8, 5))
 plt.plot(range(NR_ITERATIONS), objective_values)
 plt.xlabel('Iteration')
 plt.ylabel('Objective Value')
-plt.title('Convergence of Objective Value')
+plt.title('Convergence of Objective Value using SPSA')
 plt.grid(True)
 
 # Display both figures with just one plt.show() at the end

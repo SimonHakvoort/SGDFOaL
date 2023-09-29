@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from functions import Objective_J
+from SGDFOaL.functions import Objective_J
 
 STOCHASTIC = False
 MU = 0

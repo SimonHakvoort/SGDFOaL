@@ -6,19 +6,20 @@ def add_noise(MU, SIGMA):
     return np.random.normal(MU, SIGMA, size=1)
 
 
-def estimate_gradient(objective_f, theta, i, STOCHASTIC, MU, SIGMA, BATCH, NR_ESTIMATES):
+def estimate_gradient_spsa(objective_f, theta, i, STOCHASTIC, MU, SIGMA, BATCH, NR_ESTIMATES):
     delta_i = np.random.choice((-1, 1), size=theta.shape)
     eta_i = 1 / (i + 1)
 
     if BATCH:
-        gradient_estimates = np.zeros(NR_ESTIMATES)
+        gradient_estimates = np.zeros((NR_ESTIMATES, len(theta)))
         for n in range(NR_ESTIMATES):
             perturbation_high = objective_f(theta + eta_i * delta_i, STOCHASTIC, MU, SIGMA)
             perturbation_low = objective_f(theta - eta_i * delta_i, STOCHASTIC, MU, SIGMA)
             numerator = perturbation_high - perturbation_low
             denominator = 2 * eta_i * delta_i
-            gradient_estimates[n] = numerator / denominator
-        gradient_estimate = np.mean(gradient_estimates)
+            gradient_estimates[n,:] = numerator / denominator
+            delta_i = np.random.choice((-1, 1), size=theta.shape)
+        gradient_estimate = np.mean(gradient_estimates, axis=0)
     else:
         perturbation_high = objective_f(theta + eta_i * delta_i, STOCHASTIC, MU, SIGMA)
         perturbation_low = objective_f(theta - eta_i * delta_i, STOCHASTIC, MU, SIGMA)
@@ -28,16 +29,29 @@ def estimate_gradient(objective_f, theta, i, STOCHASTIC, MU, SIGMA, BATCH, NR_ES
 
     return gradient_estimate
 
+def estimate_gradient_gsfa(objective_f, theta, i, STOCHASTIC, MU, SIGMA, BATCH, NR_ESTIMATES):
+    delta_i = np.random.randn(len(theta))
+    eta_i = 1 / (i + 1)
+
+    if BATCH:
+        gradient_estimates = np.zeros((NR_ESTIMATES, len(theta)))
+        for n in range(NR_ESTIMATES):
+            gradient_estimates[n,:] = delta_i / eta_i * (objective_f(theta + delta_i * eta_i, STOCHASTIC, MU, SIGMA) - objective_f(theta, STOCHASTIC, MU, SIGMA))
+            delta_i = np.random.randn(len(theta))
+        gradient_estimate = np.mean(gradient_estimates, axis=0)
+    else:
+        gradient_estimate = delta_i / eta_i * (objective_f(theta + delta_i * eta_i, STOCHASTIC, MU, SIGMA) - objective_f(theta, STOCHASTIC, MU, SIGMA))
+    return gradient_estimate
 
 # The SPSA algorithm
 def SPSA(objective_f, THETA_0, EPSILON_TYPE, EPSILON_VALUE, NR_ITERATIONS, STOCHASTIC, MU, SIGMA, BATCH, NR_ESTIMATES, OPTIMIZATION_TYPE):
     thetas = np.zeros((NR_ITERATIONS + 1, len(THETA_0)))
     gradients = np.zeros((NR_ITERATIONS, len(THETA_0)))
     objective_values = np.zeros(NR_ITERATIONS)
-    thetas[0,:] = THETA_0
+    thetas[0, :] = THETA_0
 
     for i in range(NR_ITERATIONS):
-        g = estimate_gradient(objective_f, thetas[i,:], i, STOCHASTIC, MU, SIGMA, BATCH, NR_ESTIMATES)
+        g = estimate_gradient_spsa(objective_f, thetas[i, :], i, STOCHASTIC, MU, SIGMA, BATCH, NR_ESTIMATES)
         gradients[i] = g
         if EPSILON_TYPE == 'fixed':
             if OPTIMIZATION_TYPE == 'minimization':
@@ -46,12 +60,36 @@ def SPSA(objective_f, THETA_0, EPSILON_TYPE, EPSILON_VALUE, NR_ITERATIONS, STOCH
                 thetas[i + 1,:] = thetas[i,:] + EPSILON_VALUE * g
         if EPSILON_TYPE == 'decreasing':
             if OPTIMIZATION_TYPE == 'minimization':
-                thetas[i + 1,:] = thetas[i,:] - 1 / (i + 1) * g
+                thetas[i + 1,:] = thetas[i,:] - 1 / (i + 100) * g
             if OPTIMIZATION_TYPE == 'maximization':
-                thetas[i + 1,:] = thetas[i,:] + 1 / (i + 1) * g
+                thetas[i + 1,:] = thetas[i,:] + 1 / (i + 100) * g
         objective_values[i] = objective_f(thetas[i + 1], STOCHASTIC, MU, SIGMA)
 
     return thetas, gradients, objective_values
+
+# The GSFA algorithm
+def GSFA(objective_f, THETA_0, EPSILON_TYPE, EPSILON_VALUE, NR_ITERATIONS, STOCHASTIC, MU, SIGMA, BATCH, NR_ESTIMATES, OPTIMIZATION_TYPE):
+    thetas = np.zeros((NR_ITERATIONS + 1, len(THETA_0)))
+    gradients = np.zeros((NR_ITERATIONS, len(THETA_0)))
+    objective_values = np.zeros(NR_ITERATIONS)
+    thetas[0, :] = THETA_0
+
+    for i in range(NR_ITERATIONS):
+        g = estimate_gradient_gsfa(objective_f, thetas[i,:], i, STOCHASTIC, MU, SIGMA, BATCH, NR_ESTIMATES)
+        if EPSILON_TYPE == 'fixed':
+            if OPTIMIZATION_TYPE == 'minimization':
+                thetas[i + 1, :] = thetas[i, :] - EPSILON_VALUE * g
+            if OPTIMIZATION_TYPE == 'maximization':
+                thetas[i + 1, :] = thetas[i, :] + EPSILON_VALUE * g
+        if EPSILON_TYPE == 'decreasing':
+            if OPTIMIZATION_TYPE == 'minimization':
+                thetas[i + 1, :] = thetas[i, :] - 1 / (i + 100) * g
+            if OPTIMIZATION_TYPE == 'maximization':
+                thetas[i + 1, :] = thetas[i, :] + 1 / (i + 100) * g
+        objective_values[i] = objective_f(thetas[i + 1], STOCHASTIC, MU, SIGMA)
+
+    return thetas, gradients, objective_values
+
 
 def Objective_J(theta, STOCHASTIC, MU, SIGMA):
     first_part = theta[0] ** 4 - 16 * theta[0] ** 2 + 5 * theta[0]

@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from functions import SPSA, Objective_J
+from SGDFOaL.functions import SPSA, Objective_J
 # Set SPSA hyperparameters
 THETA_0 = np.array([0, 0])  # Initial guess for θ₁ and θ₂
 EPSILON_TYPE = 'fixed'  # Use 'fixed' or 'decreasing' for ε

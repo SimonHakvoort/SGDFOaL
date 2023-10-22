@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from SGDFOaL.functions import Objective_J, GSFA
+from SGDFOaL.functions import Objective_J, GradientDescent, estimate_gradient_gsfa
 
 # Set SPSA hyperparameters
 THETA_0 = np.array([5, -2])  # Initial guess for θ₁ and θ₂
@@ -30,7 +30,7 @@ best_gradients = None
 for candidate in points:
     for i in range(nr_runs):
         # Run GSFA optimization
-        thetas, gradients, objective_values = GSFA(Objective_J, candidate, EPSILON_TYPE, EPSILON_VALUE, NR_ITERATIONS,
+        thetas, gradients, objective_values = GradientDescent(Objective_J, estimate_gradient_gsfa, candidate, EPSILON_TYPE, EPSILON_VALUE, NR_ITERATIONS,
                                                    STOCHASTIC, MU, SIGMA, BATCH, NR_ESTIMATES, OPTIMIZATION_TYPE)
         if objective_values[-1] < best_objective_value:
             best_objective_value = objective_values[-1]

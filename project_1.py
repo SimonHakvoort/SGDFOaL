@@ -1,6 +1,5 @@
 import numpy as np
-from scipy.optimize import linprog
-from SGDFOaL.functions import GSFA, SPSA
+from SGDFOaL.functions import GradientDescent, estimate_gradient_spsa, estimate_gradient_gsfa
 
 numberOfRuns = 200000
 def RunExperiment(p, numRuns, STOCHASTIC, MU, SIGMA):
@@ -10,7 +9,7 @@ def RunExperiment(p, numRuns, STOCHASTIC, MU, SIGMA):
 
     V = np.random.standard_normal(numRuns)
 
-    W = np.random.exponential(1 / 0.3, numRuns)
+    W = np.random.exponential(1 / 0.3, numRuns) # Should we choose 0.3 or 1/0.3?
 
     eta = np.zeros((n, numRuns))
     X = np.zeros((n, numRuns))
@@ -39,6 +38,8 @@ def Objective(p, STOCHASTIC, MU, SIGMA):
     #     return "Hard constraint not satisfied"
 
     sum, std = RunExperiment(p, numberOfRuns, STOCHASTIC, MU, SIGMA)
+
+
 
     return np.mean(sum) / std
 
@@ -97,6 +98,6 @@ OPTIMIZATION_TYPE = 'minimization'  # 'minimization' or 'maximization'
 
 x = np.array([ 0.3931536,   0.64206392, -0.40403128])
 print(project_onto_simplex(x))
-thetas, gradients, objective_values = GSFA(Objective, p_0, EPSILON_TYPE, EPSILON_VALUE, NR_ITERATIONS, STOCHASTIC, MU, SIGMA, BATCH, NR_ESTIMATES, OPTIMIZATION_TYPE, project_onto_simplex)
+thetas, gradients, objective_values = GradientDescent(Objective, estimate_gradient_gsfa, p_0, EPSILON_TYPE, EPSILON_VALUE, NR_ITERATIONS, STOCHASTIC, MU, SIGMA, BATCH, NR_ESTIMATES, OPTIMIZATION_TYPE, project_onto_simplex)
 
 print(thetas[-1, :])

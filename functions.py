@@ -5,6 +5,8 @@ import numpy as np
 def add_noise(MU, SIGMA):
     return np.random.normal(MU, SIGMA, size=1)
 
+def no_constraint(theta):
+    return theta
 
 def estimate_gradient_spsa(objective_f, theta, i, STOCHASTIC, MU, SIGMA, BATCH, NR_ESTIMATES):
     delta_i = np.random.choice((-1, 1), size=theta.shape)
@@ -44,7 +46,7 @@ def estimate_gradient_gsfa(objective_f, theta, i, STOCHASTIC, MU, SIGMA, BATCH, 
     return gradient_estimate
 
 # The SPSA algorithm
-def SPSA(objective_f, THETA_0, EPSILON_TYPE, EPSILON_VALUE, NR_ITERATIONS, STOCHASTIC, MU, SIGMA, BATCH, NR_ESTIMATES, OPTIMIZATION_TYPE):
+def SPSA(objective_f, THETA_0, EPSILON_TYPE, EPSILON_VALUE, NR_ITERATIONS, STOCHASTIC, MU, SIGMA, BATCH, NR_ESTIMATES, OPTIMIZATION_TYPE, projection = no_constraint):
     thetas = np.zeros((NR_ITERATIONS + 1, len(THETA_0)))
     gradients = np.zeros((NR_ITERATIONS, len(THETA_0)))
     objective_values = np.zeros(NR_ITERATIONS)
@@ -63,12 +65,14 @@ def SPSA(objective_f, THETA_0, EPSILON_TYPE, EPSILON_VALUE, NR_ITERATIONS, STOCH
                 thetas[i + 1,:] = thetas[i,:] - 1 / (i + 100) * g
             if OPTIMIZATION_TYPE == 'maximization':
                 thetas[i + 1,:] = thetas[i,:] + 1 / (i + 100) * g
+        thetas[i + 1, :] = projection(thetas[i + 1, :])
         objective_values[i] = objective_f(thetas[i + 1], STOCHASTIC, MU, SIGMA)
+        print(objective_values[i])
 
     return thetas, gradients, objective_values
 
 # The GSFA algorithm
-def GSFA(objective_f, THETA_0, EPSILON_TYPE, EPSILON_VALUE, NR_ITERATIONS, STOCHASTIC, MU, SIGMA, BATCH, NR_ESTIMATES, OPTIMIZATION_TYPE):
+def GSFA(objective_f, THETA_0, EPSILON_TYPE, EPSILON_VALUE, NR_ITERATIONS, STOCHASTIC, MU, SIGMA, BATCH, NR_ESTIMATES, OPTIMIZATION_TYPE, projection = no_constraint):
     thetas = np.zeros((NR_ITERATIONS + 1, len(THETA_0)))
     gradients = np.zeros((NR_ITERATIONS, len(THETA_0)))
     objective_values = np.zeros(NR_ITERATIONS)
@@ -86,7 +90,9 @@ def GSFA(objective_f, THETA_0, EPSILON_TYPE, EPSILON_VALUE, NR_ITERATIONS, STOCH
                 thetas[i + 1, :] = thetas[i, :] - 1 / (i + 100) * g
             if OPTIMIZATION_TYPE == 'maximization':
                 thetas[i + 1, :] = thetas[i, :] + 1 / (i + 100) * g
-        objective_values[i] = objective_f(thetas[i + 1], STOCHASTIC, MU, SIGMA)
+        thetas[i + 1, :] = projection(thetas[i + 1, :])
+        objective_values[i] = objective_f(thetas[i + 1, :], STOCHASTIC, MU, SIGMA)
+        print(objective_values[i])
 
     return thetas, gradients, objective_values
 

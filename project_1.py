@@ -1,9 +1,8 @@
 import numpy as np
+from scipy.optimize import linprog
+from SGDFOaL.functions import GSFA, SPSA
 
-STOCHASTIC = False
-MU = 0
-SIGMA = 1
-numberOfRuns = 100
+numberOfRuns = 200000
 def RunExperiment(p, numRuns, STOCHASTIC, MU, SIGMA):
     n = 3
     thresholds = np.array([2, 3, 1])
@@ -29,15 +28,15 @@ def RunExperiment(p, numRuns, STOCHASTIC, MU, SIGMA):
     std = np.std(sum)
     return sum, std
 
-
+### For projected gradient descent, we need to evaluate points that lie outside of the constraint set
 def Objective(p, STOCHASTIC, MU, SIGMA):
-    if np.abs(np.sum(p) - 1) >= 1e-9:
-        print(np.sum(p))
-        return "Hard constraint not satisfied"
-
-    if np.any(p < 0):
-        print(p)
-        return "Hard constraint not satisfied"
+    # if np.abs(np.sum(p) - 1) >= 1e-9:
+    #     print(np.sum(p))
+    #     return "Hard constraint not satisfied"
+    #
+    # if np.any(p < 0):
+    #     print(p)
+    #     return "Hard constraint not satisfied"
 
     sum, std = RunExperiment(p, numberOfRuns, STOCHASTIC, MU, SIGMA)
 
@@ -53,11 +52,51 @@ def project_onto_simplex(x):
     n = len(x)
     u = np.sort(x)[::-1]
     cumsum = np.cumsum(u)
-    rho = np.where(u > (cumsum - 1) / np.arange(1, n + 1))[0][-1]
-    theta = np.max([0, (cumsum[rho] - 1) / (rho + 1)])
-    projection = np.maximum(x - theta, 0)
-    return projection
 
-x = np.array([1.1, 3, 0])
+    y = np.zeros(len(x))
 
+    for j in range(len(x)):
+        y[j] = u[j] + 1 / (j + 1) * (1 - cumsum[j])
+
+    rho = np.nonzero(y > 0)[0][-1]
+
+    l = 1 / (rho + 1) * (1 - np.sum(u[:rho + 1]))
+    z = np.maximum(x + l, 0)
+
+    if abs((np.sum(z) - 1)) > 1e-9:
+        print("x = ", x)
+        print("z = ", z)
+        print("Sum z = ", np.sum(z))
+    return z
+
+def project_onto_simplex2(v):
+    n = len(v)
+    u = np.sort(v)[::-1]
+    cumsum = np.cumsum(u)
+    rho = np.nonzero(u > (cumsum - 1) / np.arange(1, n + 1))[0][-1]
+    theta = np.maximum(0, (cumsum[rho] - 1) / (rho + 1))
+
+    z = np.maximum(v - theta, 0)
+    if (np.sum(z) - 1) > 1e-9:
+        print("x = ", v)
+        print("z = ", z)
+        print("Sum z = ", np.sum(z))
+    return z
+
+
+p_0 = np.array([1/3, 1/3, 1/3])
+EPSILON_TYPE = 'fixed'  # Use 'fixed' or 'decreasing' for ε
+EPSILON_VALUE = 0.1  # Initial value of ε if EPSILON_TYPE is 'fixed'
+NR_ITERATIONS = 10000  # Number of iterations
+STOCHASTIC = False  # Set to True if you want to add stochasticity
+MU = 0.0  # Mean of the stochastic noise
+SIGMA = 0.1  # Standard deviation of the stochastic noise
+BATCH = True  # Set to True for batch estimation of the gradient
+NR_ESTIMATES = 3  # Number of estimates when BATCH is True
+OPTIMIZATION_TYPE = 'minimization'  # 'minimization' or 'maximization'
+
+x = np.array([ 0.3931536,   0.64206392, -0.40403128])
 print(project_onto_simplex(x))
+thetas, gradients, objective_values = GSFA(Objective, p_0, EPSILON_TYPE, EPSILON_VALUE, NR_ITERATIONS, STOCHASTIC, MU, SIGMA, BATCH, NR_ESTIMATES, OPTIMIZATION_TYPE, project_onto_simplex)
+
+print(thetas[-1, :])

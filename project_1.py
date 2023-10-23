@@ -88,7 +88,7 @@ def project_onto_simplex2(v):
 p_0 = np.array([1/3, 1/3, 1/3])
 EPSILON_TYPE = 'fixed'  # Use 'fixed' or 'decreasing' for ε
 EPSILON_VALUE = 0.1  # Initial value of ε if EPSILON_TYPE is 'fixed'
-NR_ITERATIONS = 10000  # Number of iterations
+NR_ITERATIONS = 100  # Number of iterations
 STOCHASTIC = False  # Set to True if you want to add stochasticity
 MU = 0.0  # Mean of the stochastic noise
 SIGMA = 0.1  # Standard deviation of the stochastic noise

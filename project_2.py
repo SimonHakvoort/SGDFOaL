@@ -1,12 +1,14 @@
 import numpy as np
-from SGDFOaL.functions import GradientDescent, estimate_gradient_spsa, estimate_gradient_gsfa
+from SGDFOaL.functions import GradientDescent, estimate_gradient_spsa, estimate_gradient_gsfa, \
+    estimate_gradient_finite_differences
 
 numberOfRuns = 100000
 
 def RunExperiment(theta, numRuns, STOCHASTIC, MU, SIGMA):
     ###
     if theta < 0:
-        return "Invalid theta"
+        #raise Exception("theta should be positive")
+        theta = 0.000001
 
     N = 10
 
@@ -39,14 +41,14 @@ def Objective(theta, STOCHASTIC, MU, SIGMA):
 
 theta_0 = np.array([10])
 EPSILON_TYPE = 'fixed'  # Use 'fixed' or 'decreasing' for ε
-EPSILON_VALUE = 0.01  # Initial value of ε if EPSILON_TYPE is 'fixed'
+EPSILON_VALUE = 0.00001  # Initial value of ε if EPSILON_TYPE is 'fixed'
 NR_ITERATIONS = 500  # Number of iterations
 STOCHASTIC = False  # Set to True if you want to add stochasticity
 MU = 0.0  # Mean of the stochastic noise
 SIGMA = 0.1  # Standard deviation of the stochastic noise
-BATCH = True  # Set to True for batch estimation of the gradient
+BATCH = False  # Set to True for batch estimation of the gradient
 NR_ESTIMATES = 3  # Number of estimates when BATCH is True
 OPTIMIZATION_TYPE = 'minimization'  # 'minimization' or 'maximization'
 
-thetas, gradients, objective_values = GradientDescent(Objective, estimate_gradient_gsfa, theta_0, EPSILON_TYPE, EPSILON_VALUE, NR_ITERATIONS, STOCHASTIC, MU, SIGMA, BATCH, NR_ESTIMATES, OPTIMIZATION_TYPE)
+thetas, gradients, objective_values = GradientDescent(Objective, estimate_gradient_finite_differences, theta_0, EPSILON_TYPE, EPSILON_VALUE, NR_ITERATIONS, STOCHASTIC, MU, SIGMA, BATCH, NR_ESTIMATES, OPTIMIZATION_TYPE)
 print(thetas[-1])

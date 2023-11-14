@@ -45,6 +45,17 @@ def estimate_gradient_gsfa(objective_f, theta, i, STOCHASTIC, MU, SIGMA, BATCH, 
         gradient_estimate = delta_i / eta_i * (objective_f(theta + delta_i * eta_i, STOCHASTIC, MU, SIGMA) - objective_f(theta, STOCHASTIC, MU, SIGMA))
     return gradient_estimate
 
+def estimate_gradient_finite_differences(objective_f, theta, i, STOCHASTIC, MU, SIGMA, BATCH, NR_ESTIMATES):
+    delta = 0.00001 # can be changed to a different value
+    gradient_estimate = np.zeros(len(theta))
+
+    for j in range(len(theta)):
+        upper_function = objective_f(theta + delta * np.eye(len(theta))[j], STOCHASTIC, MU, SIGMA)
+        lower_function = objective_f(theta - delta * np.eye(len(theta))[j], STOCHASTIC, MU, SIGMA)
+        gradient_estimate[j] = (upper_function - lower_function) / (2 * delta)
+
+    return gradient_estimate
+
 # The SPSA algorithm
 def GradientDescent(objective_f, gradient_estimator, THETA_0, EPSILON_TYPE, EPSILON_VALUE, NR_ITERATIONS, STOCHASTIC, MU, SIGMA, BATCH, NR_ESTIMATES, OPTIMIZATION_TYPE, projection = no_constraint):
     thetas = np.zeros((NR_ITERATIONS + 1, len(THETA_0)))

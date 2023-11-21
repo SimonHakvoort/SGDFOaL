@@ -1,58 +1,42 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from SGDFOaL.project_1 import Objective
+from SGDFOaL.project_1 import RunExperiment
 
 increment = 0.01
 values = []
 
-# Iterate over possible values for x1
-for x1 in range(1, int(1/increment)):
-    x1 *= increment
-
-    # Iterate over possible values for x2
-    for x2 in range(1, int((1 - x1)/increment)):
-        x2 *= increment
-
-        # Check the condition x1 + x2 < 1
-        if x1 + x2 < 1:
-            values.append((x1, x2, 1 - x1 - x2))
-
-# Convert the list of tuples to a numpy array
-values = np.array(values)
-
-
 STOCHASTIC = False
 MU = 0
 SIGMA = 0.1
-objective_values = []
+numRuns = 100000
+objective_values = np.zeros((int(1 / increment) + 1, int(1 / increment) + 1))
 
-# Iterate over all possible values for x1, x2 and x3
-for x1, x2, x3 in values:
-    objective_values.append(Objective(np.array([x1, x2, x3]), STOCHASTIC, MU, SIGMA))
+p1_values = np.arange(0, 1 + increment, increment)
+p3_values = np.arange(0, 1 + increment, increment)
+
+for i in range(len(p1_values)):
+    for j in range(len(p3_values)):
+        p1 = p1_values[i]
+        p3 = p3_values[j]
+        if p1 + p3 <= 1:
+            p2 = 1 - p1 - p3
+            p = np.array([p1, p2, p3])
+            sum = 0
+            std = 0
+            while std == 0:
+                sum, std = RunExperiment(p, numRuns, STOCHASTIC, MU, SIGMA)
+            objective_values[i, j] = np.mean(sum) / std
+
 
 plt.figure()
-levels = np.arange(-500, 3200, 50)
-contour = plt.contourf(values[0,:], values[1,:], objective_values, levels=levels, cmap='viridis')  # You can choose a different colormap
+levels = np.arange(0, 0.32, 0.01)
+contour = plt.contourf(p1_values, p3_values, objective_values, levels=levels, cmap='viridis')  # You can choose a different colormap
 
 # Add a colorbar for reference
 plt.colorbar(contour)
 
 # Add labels and title for the contour plot
-plt.xlabel('$\\theta_1$')
-plt.ylabel('$\\theta_2$')
-plt.title('2D Plot of a Function')
+plt.xlabel('$p_1$')
+plt.ylabel('$p_3$')
 
-# Create the second figure for the 3D surface plot
-fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
-surface = ax.plot_surface(values[0,:], values[1,:], objective_values, cmap='viridis')  # You can choose a different colormap
-
-# Set labels and title for the 3D surface plot
-ax.set_xlabel('$\\theta_1$')
-ax.set_ylabel('$\\theta_2$')
-ax.set_zlabel('$J$')
-ax.set_title('3D Surface Plot of the Function')
-
-
-# Display both plots
 plt.show()

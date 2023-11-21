@@ -50,5 +50,5 @@ BATCH = False  # Set to True for batch estimation of the gradient
 NR_ESTIMATES = 3  # Number of estimates when BATCH is True
 OPTIMIZATION_TYPE = 'minimization'  # 'minimization' or 'maximization'
 
-thetas, gradients, objective_values = GradientDescent(Objective, estimate_gradient_finite_differences, theta_0, EPSILON_TYPE, EPSILON_VALUE, NR_ITERATIONS, STOCHASTIC, MU, SIGMA, BATCH, NR_ESTIMATES, OPTIMIZATION_TYPE)
-print(thetas[-1])
+#thetas, gradients, objective_values = GradientDescent(Objective, estimate_gradient_finite_differences, theta_0, EPSILON_TYPE, EPSILON_VALUE, NR_ITERATIONS, STOCHASTIC, MU, SIGMA, BATCH, NR_ESTIMATES, OPTIMIZATION_TYPE)
+#print(thetas[-1])

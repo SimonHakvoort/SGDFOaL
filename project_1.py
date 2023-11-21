@@ -28,19 +28,8 @@ def RunExperiment(p, numRuns, STOCHASTIC, MU, SIGMA):
     return sum, std
 
 ### For projected gradient descent, we need to evaluate points that lie outside of the constraint set
-def Objective(p, STOCHASTIC, MU, SIGMA):
-    # if np.abs(np.sum(p) - 1) >= 1e-9:
-    #     print(np.sum(p))
-    #     return "Hard constraint not satisfied"
-    #
-    # if np.any(p < 0):
-    #     print(p)
-    #     return "Hard constraint not satisfied"
-
+def Objective1(p, STOCHASTIC, MU, SIGMA):
     sum, std = RunExperiment(p, numberOfRuns, STOCHASTIC, MU, SIGMA)
-
-
-
     return np.mean(sum) / std
 
 
@@ -96,8 +85,8 @@ BATCH = True  # Set to True for batch estimation of the gradient
 NR_ESTIMATES = 3  # Number of estimates when BATCH is True
 OPTIMIZATION_TYPE = 'minimization'  # 'minimization' or 'maximization'
 
-x = np.array([ 0.3931536,   0.64206392, -0.40403128])
-print(project_onto_simplex(x))
-thetas, gradients, objective_values = GradientDescent(Objective, estimate_gradient_gsfa, p_0, EPSILON_TYPE, EPSILON_VALUE, NR_ITERATIONS, STOCHASTIC, MU, SIGMA, BATCH, NR_ESTIMATES, OPTIMIZATION_TYPE, project_onto_simplex)
-
-print(thetas[-1, :])
+# x = np.array([ 0.3931536,   0.64206392, -0.40403128])
+# print(project_onto_simplex(x))
+# thetas, gradients, objective_values = GradientDescent(Objective1, estimate_gradient_gsfa, p_0, EPSILON_TYPE, EPSILON_VALUE, NR_ITERATIONS, STOCHASTIC, MU, SIGMA, BATCH, NR_ESTIMATES, OPTIMIZATION_TYPE, project_onto_simplex)
+#
+# print(thetas[-1, :])

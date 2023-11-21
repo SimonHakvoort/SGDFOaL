@@ -74,19 +74,18 @@ def project_onto_simplex2(v):
     return z
 
 
-p_0 = np.array([1/3, 1/3, 1/3])
+p_0 = np.array([1,0,0])
 EPSILON_TYPE = 'fixed'  # Use 'fixed' or 'decreasing' for ε
 EPSILON_VALUE = 0.1  # Initial value of ε if EPSILON_TYPE is 'fixed'
-NR_ITERATIONS = 100  # Number of iterations
+NR_ITERATIONS = 1000  # Number of iterations
 STOCHASTIC = False  # Set to True if you want to add stochasticity
 MU = 0.0  # Mean of the stochastic noise
 SIGMA = 0.1  # Standard deviation of the stochastic noise
 BATCH = True  # Set to True for batch estimation of the gradient
 NR_ESTIMATES = 3  # Number of estimates when BATCH is True
-OPTIMIZATION_TYPE = 'minimization'  # 'minimization' or 'maximization'
+OPTIMIZATION_TYPE = 'maximization'  # 'minimization' or 'maximization'
 
-# x = np.array([ 0.3931536,   0.64206392, -0.40403128])
-# print(project_onto_simplex(x))
-# thetas, gradients, objective_values = GradientDescent(Objective1, estimate_gradient_gsfa, p_0, EPSILON_TYPE, EPSILON_VALUE, NR_ITERATIONS, STOCHASTIC, MU, SIGMA, BATCH, NR_ESTIMATES, OPTIMIZATION_TYPE, project_onto_simplex)
-#
-# print(thetas[-1, :])
+
+thetas, gradients, objective_values = GradientDescent(Objective1, estimate_gradient_gsfa, p_0, EPSILON_TYPE, EPSILON_VALUE, NR_ITERATIONS, STOCHASTIC, MU, SIGMA, BATCH, NR_ESTIMATES, OPTIMIZATION_TYPE, project_onto_simplex)
+
+print(thetas[-1, :])

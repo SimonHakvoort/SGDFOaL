@@ -73,13 +73,14 @@ def GradientDescent(objective_f, gradient_estimator, THETA_0, EPSILON_TYPE, EPSI
                 thetas[i + 1,:] = thetas[i,:] + EPSILON_VALUE * g
         if EPSILON_TYPE == 'decreasing':
             if OPTIMIZATION_TYPE == 'minimization':
-                thetas[i + 1,:] = thetas[i,:] - 1 / (i + 100) * g
+                thetas[i + 1,:] = thetas[i,:] - 1 / (i + 1) * g
             if OPTIMIZATION_TYPE == 'maximization':
-                thetas[i + 1,:] = thetas[i,:] + 1 / (i + 100) * g
+                thetas[i + 1,:] = thetas[i,:] + 1 / (i + 1) * g
         thetas[i + 1, :] = projection(thetas[i + 1, :])
         objective_values[i] = objective_f(thetas[i + 1], STOCHASTIC, MU, SIGMA)
-        print(thetas[i + 1])
-        print(objective_values[i])
+        if i % 10 == 0:
+            print(thetas[i + 1])
+            print(objective_values[i])
 
     return thetas, gradients, objective_values
 

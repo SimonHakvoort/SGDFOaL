@@ -1,7 +1,7 @@
 import numpy as np
 from SGDFOaL.functions import GradientDescent, estimate_gradient_spsa, estimate_gradient_gsfa
 
-numberOfRuns = 200000
+numberOfRuns = 20000
 def RunExperiment(p, numRuns, STOCHASTIC, MU, SIGMA):
     n = 3
     thresholds = np.array([2, 3, 1])
@@ -30,6 +30,10 @@ def RunExperiment(p, numRuns, STOCHASTIC, MU, SIGMA):
 ### For projected gradient descent, we need to evaluate points that lie outside of the constraint set
 def Objective1(p, STOCHASTIC, MU, SIGMA):
     sum, std = RunExperiment(p, numberOfRuns, STOCHASTIC, MU, SIGMA)
+
+    if np.mean(sum) == 0:
+        return 0
+
     return np.mean(sum) / std
 
 
@@ -76,12 +80,12 @@ def project_onto_simplex2(v):
 
 p_0 = np.array([1,0,0])
 EPSILON_TYPE = 'fixed'  # Use 'fixed' or 'decreasing' for ε
-EPSILON_VALUE = 0.1  # Initial value of ε if EPSILON_TYPE is 'fixed'
-NR_ITERATIONS = 1000  # Number of iterations
+EPSILON_VALUE = 0.01  # Initial value of ε if EPSILON_TYPE is 'fixed'
+NR_ITERATIONS = 10000  # Number of iterations
 STOCHASTIC = False  # Set to True if you want to add stochasticity
 MU = 0.0  # Mean of the stochastic noise
 SIGMA = 0.1  # Standard deviation of the stochastic noise
-BATCH = True  # Set to True for batch estimation of the gradient
+BATCH = False  # Set to True for batch estimation of the gradient
 NR_ESTIMATES = 3  # Number of estimates when BATCH is True
 OPTIMIZATION_TYPE = 'maximization'  # 'minimization' or 'maximization'
 

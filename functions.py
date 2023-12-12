@@ -78,7 +78,7 @@ def GradientDescent(objective_f, gradient_estimator, THETA_0, EPSILON_TYPE, EPSI
                 thetas[i + 1,:] = thetas[i,:] + 1 / (i + 1) * g
         thetas[i + 1, :] = projection(thetas[i + 1, :])
         objective_values[i] = objective_f(thetas[i + 1], STOCHASTIC, MU, SIGMA)
-        if i % 100 == 0:
+        if i % 10 == 0:
             print(thetas[i + 1])
             print(objective_values[i])
 

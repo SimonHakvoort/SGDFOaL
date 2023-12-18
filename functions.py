@@ -15,16 +15,16 @@ def estimate_gradient_spsa(objective_f, theta, i, STOCHASTIC, MU, SIGMA, BATCH, 
     if BATCH:
         gradient_estimates = np.zeros((NR_ESTIMATES, len(theta)))
         for n in range(NR_ESTIMATES):
-            perturbation_high = objective_f(theta + eta_i * delta_i, STOCHASTIC, MU, SIGMA)
-            perturbation_low = objective_f(theta - eta_i * delta_i, STOCHASTIC, MU, SIGMA)
+            perturbation_high = objective_f(theta + eta_i * delta_i, STOCHASTIC, MU, SIGMA, i)
+            perturbation_low = objective_f(theta - eta_i * delta_i, STOCHASTIC, MU, SIGMA, i)
             numerator = perturbation_high - perturbation_low
             denominator = 2 * eta_i * delta_i
             gradient_estimates[n,:] = numerator / denominator
             delta_i = np.random.choice((-1, 1), size=theta.shape)
         gradient_estimate = np.mean(gradient_estimates, axis=0)
     else:
-        perturbation_high = objective_f(theta + eta_i * delta_i, STOCHASTIC, MU, SIGMA)
-        perturbation_low = objective_f(theta - eta_i * delta_i, STOCHASTIC, MU, SIGMA)
+        perturbation_high = objective_f(theta + eta_i * delta_i, STOCHASTIC, MU, SIGMA, i)
+        perturbation_low = objective_f(theta - eta_i * delta_i, STOCHASTIC, MU, SIGMA, i)
         numerator = perturbation_high - perturbation_low
         denominator = 2 * eta_i * delta_i
         gradient_estimate = numerator / denominator
@@ -38,11 +38,11 @@ def estimate_gradient_gsfa(objective_f, theta, i, STOCHASTIC, MU, SIGMA, BATCH, 
     if BATCH:
         gradient_estimates = np.zeros((NR_ESTIMATES, len(theta)))
         for n in range(NR_ESTIMATES):
-            gradient_estimates[n,:] = delta_i / eta_i * (objective_f(theta + delta_i * eta_i, STOCHASTIC, MU, SIGMA) - objective_f(theta, STOCHASTIC, MU, SIGMA))
+            gradient_estimates[n,:] = delta_i / eta_i * (objective_f(theta + delta_i * eta_i, STOCHASTIC, MU, SIGMA, i) - objective_f(theta, STOCHASTIC, MU, SIGMA, i))
             delta_i = np.random.randn(len(theta))
         gradient_estimate = np.mean(gradient_estimates, axis=0)
     else:
-        gradient_estimate = delta_i / eta_i * (objective_f(theta + delta_i * eta_i, STOCHASTIC, MU, SIGMA) - objective_f(theta, STOCHASTIC, MU, SIGMA))
+        gradient_estimate = delta_i / eta_i * (objective_f(theta + delta_i * eta_i, STOCHASTIC, MU, SIGMA, i) - objective_f(theta, STOCHASTIC, MU, SIGMA, i))
     return gradient_estimate
 
 def estimate_gradient_finite_differences(objective_f, theta, i, STOCHASTIC, MU, SIGMA, BATCH, NR_ESTIMATES):
@@ -50,8 +50,8 @@ def estimate_gradient_finite_differences(objective_f, theta, i, STOCHASTIC, MU, 
     gradient_estimate = np.zeros(len(theta))
 
     for j in range(len(theta)):
-        upper_function = objective_f(theta + delta * np.eye(len(theta))[j], STOCHASTIC, MU, SIGMA)
-        lower_function = objective_f(theta - delta * np.eye(len(theta))[j], STOCHASTIC, MU, SIGMA)
+        upper_function = objective_f(theta + delta * np.eye(len(theta))[j], STOCHASTIC, MU, SIGMA, i)
+        lower_function = objective_f(theta - delta * np.eye(len(theta))[j], STOCHASTIC, MU, SIGMA, i)
         gradient_estimate[j] = (upper_function - lower_function) / (2 * delta)
 
     return gradient_estimate
@@ -77,7 +77,7 @@ def GradientDescent(objective_f, gradient_estimator, THETA_0, EPSILON_TYPE, EPSI
             if OPTIMIZATION_TYPE == 'maximization':
                 thetas[i + 1,:] = thetas[i,:] + 1 / (i + 1) * g
         thetas[i + 1, :] = projection(thetas[i + 1, :])
-        objective_values[i] = objective_f(thetas[i + 1], STOCHASTIC, MU, SIGMA)
+        objective_values[i] = objective_f(thetas[i + 1], STOCHASTIC, MU, SIGMA, i)
         if i % 10 == 0:
             print(thetas[i + 1])
             print(objective_values[i])

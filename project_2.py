@@ -4,7 +4,8 @@ from SGDFOaL.functions import GradientDescent, estimate_gradient_spsa, estimate_
 
 numberOfRuns = 1
 
-def RunExperiment(theta, numRuns, STOCHASTIC, MU, SIGMA):
+def RunExperiment(theta, numRuns, STOCHASTIC, MU, SIGMA, i):
+    np.random.seed(i)
     if theta[0] < 0:
         #raise Exception("theta should be positive")
         theta[0] = 0.00000001
@@ -24,10 +25,10 @@ def RunExperiment(theta, numRuns, STOCHASTIC, MU, SIGMA):
 
     return averageWaitingTimes
 
-def Objective(theta, STOCHASTIC, MU, SIGMA):
+def Objective(theta, STOCHASTIC, MU, SIGMA, i):
     z = 8
 
-    quantile = np.quantile(RunExperiment(theta, numberOfRuns, STOCHASTIC, MU, SIGMA), 0.9)
+    quantile = np.quantile(RunExperiment(theta, numberOfRuns, STOCHASTIC, MU, SIGMA, i), 0.9)
 
     # maybe we could also first take the mean and then compute the squared difference?
     # this is what I would find logical

@@ -4,7 +4,8 @@ from matplotlib import pyplot as plt
 from SGDFOaL.functions import GradientDescent, estimate_gradient_spsa, estimate_gradient_gsfa
 
 numberOfRuns = 20000
-def RunExperiment(p, numRuns, STOCHASTIC, MU, SIGMA):
+def RunExperiment(p, numRuns, STOCHASTIC, MU, SIGMA, i):
+    np.random.seed(i)
     n = 3
     thresholds = np.array([2, 3, 1])
     rho = 0.6
@@ -30,8 +31,8 @@ def RunExperiment(p, numRuns, STOCHASTIC, MU, SIGMA):
     return sum, std
 
 ### For projected gradient descent, we need to evaluate points that lie outside of the constraint set
-def Objective1(p, STOCHASTIC, MU, SIGMA):
-    sum, std = RunExperiment(p, numberOfRuns, STOCHASTIC, MU, SIGMA)
+def Objective1(p, STOCHASTIC, MU, SIGMA, i):
+    sum, std = RunExperiment(p, numberOfRuns, STOCHASTIC, MU, SIGMA, i)
 
     if np.mean(sum) == 0:
         return 0

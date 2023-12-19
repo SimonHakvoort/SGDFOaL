@@ -72,20 +72,24 @@ def project_onto_simplex(x):
 p_0 = np.array([1,0,0])
 EPSILON_TYPE = 'decreasing'  # Use 'fixed' or 'decreasing' for ε
 EPSILON_VALUE = 0.001  # Initial value of ε if EPSILON_TYPE is 'fixed'
-NR_ITERATIONS = 20  # Number of iterations
+NR_ITERATIONS = 1000  # Number of iterations
 STOCHASTIC = False  # Set to True if you want to add stochasticity
 MU = 0.0  # Mean of the stochastic noise
 SIGMA = 0.1  # Standard deviation of the stochastic noise
 BATCH = False  # Set to True for batch estimation of the gradient
 NR_ESTIMATES = 3  # Number of estimates when BATCH is True
 OPTIMIZATION_TYPE = 'maximization'  # 'minimization' or 'maximization'
+initial_seed = 0 # set the initial seed for the random number generator (needs to change for each run)
+# In the loop you can set initial seed to i * NumberOfRuns, since then we get a different seed for each time update of theta in every run
 
 
-thetas, gradients, objective_values = GradientDescent(Objective1, estimate_gradient_gsfa, p_0, EPSILON_TYPE, EPSILON_VALUE, NR_ITERATIONS, STOCHASTIC, MU, SIGMA, BATCH, NR_ESTIMATES, OPTIMIZATION_TYPE, project_onto_simplex)
+thetas, gradients, objective_values = GradientDescent(Objective1, estimate_gradient_gsfa, p_0, EPSILON_TYPE, EPSILON_VALUE, NR_ITERATIONS, STOCHASTIC, MU, SIGMA, BATCH, NR_ESTIMATES, OPTIMIZATION_TYPE, project_onto_simplex, initial_seed)
 
 print(thetas[-1, :])
 
 plt.figure()
-plt.plot(range(NR_ITERATIONS), objective_values)
+plt.plot(range(NR_ITERATIONS + 1), thetas[:, 0], label='p1')
+plt.plot(range(NR_ITERATIONS + 1), thetas[:, 1], label='p2')
+plt.plot(range(NR_ITERATIONS + 1), thetas[:, 2], label='p3')
 
 plt.show()

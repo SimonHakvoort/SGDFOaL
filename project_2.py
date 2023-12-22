@@ -2,7 +2,7 @@ import numpy as np
 from SGDFOaL.functions import GradientDescent, estimate_gradient_spsa, estimate_gradient_gsfa, \
     estimate_gradient_finite_differences
 
-numberOfRuns = 1
+numberOfRuns = 50
 
 def RunExperiment(theta, numRuns, STOCHASTIC, MU, SIGMA, i):
     np.random.seed(i)
@@ -17,8 +17,8 @@ def RunExperiment(theta, numRuns, STOCHASTIC, MU, SIGMA, i):
 
     # Calculate the waiting times:
     waitingTimes = np.zeros((N, numRuns))
-    for i in range(N - 1):
-        waitingTimes[i + 1, :] = np.maximum(0, waitingTimes[i, :] + serviceTimes[i, :] - interArrivalTimes[i + 1, :])
+    for j in range(N - 1):
+        waitingTimes[j + 1, :] = np.maximum(0, waitingTimes[j, :] + serviceTimes[j, :] - interArrivalTimes[j + 1, :])
 
     # Caclulate the average waiting time for each customer
     averageWaitingTimes = np.mean(waitingTimes, axis=0)
@@ -34,13 +34,14 @@ def Objective(theta, STOCHASTIC, MU, SIGMA, i):
     # this is what I would find logical
     return np.mean((quantile - z) ** 2)
 
-def SimpleGradient(objective_f, theta, i, STOCHASTIC, MU, SIGMA, BATCH, NR_ESTIMATES):
-    experiment = RunExperiment(theta, numberOfRuns, STOCHASTIC, MU, SIGMA)
+def SimpleGradient(objective_f, theta, i, STOCHASTIC, MU, SIGMA, BATCH, NR_ESTIMATES, initial_seed = 0):
+    np.random.seed(i + initial_seed)
+    experiment = RunExperiment(theta, numberOfRuns, STOCHASTIC, MU, SIGMA, i)
 
     # amount of times waiting time is above 8
     indicator = (experiment <= theta[1]).astype(int)
 
-    q_update = 20 * (0.9 - np.mean(indicator))
+    q_update = 10 * (0.9 - np.mean(indicator))
 
     theta_update = -2 * (theta[1] - 8)
 
@@ -50,10 +51,10 @@ def SimpleGradient(objective_f, theta, i, STOCHASTIC, MU, SIGMA, BATCH, NR_ESTIM
 
 
 
-theta_0 = np.array([1, 1])
-EPSILON_TYPE = 'fixed'  # Use 'fixed' or 'decreasing' for ε
-EPSILON_VALUE = 0.00005  # Initial value of ε if EPSILON_TYPE is 'fixed'
-NR_ITERATIONS = 1000000  # Number of iterations
+theta_0 = np.array([3, 7])
+EPSILON_TYPE = 'decreasing'  # Use 'fixed' or 'decreasing' for ε
+EPSILON_VALUE = 0.01  # Initial value of ε if EPSILON_TYPE is 'fixed'
+NR_ITERATIONS = 5000  # Number of iterations
 STOCHASTIC = False  # Set to True if you want to add stochasticity
 MU = 0.0  # Mean of the stochastic noise
 SIGMA = 0.1  # Standard deviation of the stochastic noise
